@@ -19,7 +19,9 @@ jobs:
     - uses: dtolnay/rust-toolchain@stable
     - uses: ConorMacBride/install-package@v1
       with: 
-        apt: librust-alsa-sys-dev
+        # librust-alsa-sys-dev :解决 [failed to run custom build command for `alsa-sys v0.3.1`]
+        # cmake :解决 [failed to run custom build command for `libudev-sys v0.1.4`]
+        apt: librust-alsa-sys-dev cmake
     - name: Build
       run: cargo build --verbose
     - name: Run tests
