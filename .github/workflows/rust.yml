@@ -44,7 +44,7 @@ jobs:
 
     - name: First WASM build
       run: |
-        cargo build --release --example ui --target wasm32-unknown-unknown
+        cargo build --release --example web --target wasm32-unknown-unknown
         tree
 
 #    - uses: ConorMacBride/install-package@v1
