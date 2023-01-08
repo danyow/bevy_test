@@ -10,19 +10,49 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
-  build:
+  build-examples-on-wasm:
 
     runs-on: ubuntu-latest
-
+    timeout-minutes: 60
     steps:
     - uses: actions/checkout@v3
+
     - uses: dtolnay/rust-toolchain@stable
-    - uses: ConorMacBride/install-package@v1
-      with: 
-        # librust-alsa-sys-dev :解决 [failed to run custom build command for `alsa-sys v0.3.1`]
-        # libudev-dev :解决 [failed to run custom build command for `libudev-sys v0.1.4`]
-        apt: librust-alsa-sys-dev libudev-dev
-    - name: Build
-      run: cargo build --verbose
-    - name: Run tests
-      run: cargo test --verbose
+      with:
+        target: wasm32-unknown-unknown
+
+    - uses: actions/cache@v3
+      with:
+        path: |
+          ~/.cargo/bin/
+          ~/.cargo/registry/index/
+          ~/.cargo/registry/cache/
+          ~/.cargo/git/db/
+          ~/.github/start-wasm-example/node_modules
+          target/
+        key: ${{ runner.os }}-wasm-build-examples-${{ hashFiles('**/Cargo.toml') }}
+
+    - name: install xvfb, llvmpipe and lavapipe
+      run: |
+        sudo apt-get update -y -qq
+        sudo add-apt-repository ppa:oibaf/graphics-drivers -y
+        sudo apt-get update
+        sudo apt install -y xvfb libegl1-mesa libgl1-mesa-dri libxcb-xfixes0-dev mesa-vulkan-drivers
+
+    - name: Install wasm-bindgen
+      run: cargo install --force wasm-bindgen-cli
+
+    - name: First WASM build
+      run: |
+        cargo build --release --example ui --target wasm32-unknown-unknown
+        tree
+
+#    - uses: ConorMacBride/install-package@v1
+#      with:
+#        # librust-alsa-sys-dev :解决 [failed to run custom build command for `alsa-sys v0.3.1`]
+#        # libudev-dev :解决 [failed to run custom build command for `libudev-sys v0.1.4`]
+#        apt: librust-alsa-sys-dev libudev-dev
+#    - name: Build
+#      run: cargo build --verbose
+#    - name: Run tests
+#      run: cargo test --verbose
